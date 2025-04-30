@@ -8,9 +8,11 @@ urlpatterns = [
     path('', views.AdsListView.as_view(), name='list'),
     path('add_ad/', views.AdCreateView.as_view(), name='add_ad'),
     path('ads/<int:ad_pk>/', views.AdDetailView.as_view(), name='detail_ad'),
-    path('ads/<int:ad_pk>/edit/', views.AdUpdateView.as_view(), name='update_ad'),
+    path('ads/<int:ad_pk>/edit/',
+         views.AdUpdateView.as_view(), name='update_ad'),
     path(
-        'ads/<int:ad_pk>/delete/', views.AdDeleteView.as_view(), name='delete_ad'),
+        'ads/<int:ad_pk>/delete/',
+        views.AdDeleteView.as_view(), name='delete_ad'),
 
     path(
         'ads/<int:ad_receiver_pk>/user-available-ads/',
@@ -30,6 +32,5 @@ urlpatterns = [
     path('user-ads/', views.UserAdsView.as_view(), name='user_ads'),
     path('user-excs/', views.UserExcsView.as_view(), name='user_excs'),
 
-    # path('error/', views.Error.as_view(), name='error')
-    ]
-
+    # path('error/', views.Error.as_view(), name='error') ###
+]
