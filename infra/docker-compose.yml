@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  barter_system:
+    container_name: barter_system
+    image: golovin91k/barter_system:latest
+    ports:
+      - "8090:8090"
+    env_file:
+      - .env
+    depends_on:
+      barter_system_db:
+        condition: service_healthy
+    command: gunicorn barter_system.wsgi:application --bind 0.0.0.0:8090 --workers 3
+    volumes:
+      - /home/barter_system/static:/app/collected_static
+      - /home/barter_system/media:/app/media
+    networks:
+      - barter_system-network
+
+  barter_system_db:
+    container_name: barter_system_db
+    image: postgres:16-alpine
+    restart: always
+    volumes:
+      - barter_system_postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      timeout: 10s
+    networks:
+      - barter_system-network
+
+volumes:
+  barter_system_postgres_data:
+
+networks:
+  barter_system-network:
+    driver: bridge

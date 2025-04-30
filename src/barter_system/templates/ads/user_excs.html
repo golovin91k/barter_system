@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block title %}
+  Мои обмены
+{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center mb-4">
+  <form method="get" action="" class="w-100">
+    <div class="row g-2 align-items-end flex-wrap">
+      
+      <!-- Получатели -->
+      <div class="col-auto">
+        <label for="ad_receiver" class="form-label mb-0">Получатели</label>
+        <select name="ad_receiver" id="ad_receiver" class="form-select">
+          <option value="">Все</option>
+          {% for ad_receiver in ad_receivers %}
+            <option value="{{ ad_receiver }}" {% if request.GET.ad_receiver == ad_receiver %}selected{% endif %}>
+              {{ ad_receiver }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Отправители -->
+      <div class="col-auto">
+        <label for="ad_sender" class="form-label mb-0">Отправители</label>
+        <select name="ad_sender" id="ad_sender" class="form-select">
+          <option value="">Все</option>
+          {% for ad_sender in ad_senders %}
+            <option value="{{ ad_sender }}" {% if request.GET.ad_sender == ad_sender %}selected{% endif %}>
+              {{ ad_sender }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Статус -->
+      <div class="col-auto">
+        <label for="status" class="form-label mb-0">Статус</label>
+        <select name="status" id="status" class="form-select">
+          <option value="">Все</option>
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Кнопка -->
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Фильтровать</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="container py-4">
+  <h2 class="text-center mb-4">Мои обмены</h2>
+
+  <div class="row row-cols-1 row-cols-md-2 g-4">
+    {% for object in object_list %}
+    <div class="col">
+      <div class="card shadow-sm h-100 position-relative">
+        <div class="card-body">
+
+          <div class="row">
+            <div class="col-6 text-center">
+              <img src="{{ object.ad_sender.image_url }}" class="img-fluid img-thumbnail mb-2" alt="{{ object.ad_sender.title }}">
+              <h5 class="card-title">{{ object.ad_sender.title }}</h5>
+            </div>
+            <div class="col-6 text-center">
+              <img src="{{ object.ad_receiver.image_url }}" class="img-fluid img-thumbnail mb-2" alt="{{ object.ad_receiver.title }}">
+              <h5 class="card-title">{{ object.ad_receiver.title }}</h5>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <p class="card-text"><strong>Комментарий:</strong> {{ object.comment|default:"-"|linebreaksbr }}</p>
+            <p class="card-text"><strong>Статус:</strong> 
+              {% if object.status == 'pending' %}
+                <span class="badge bg-warning text-dark">На рассмотрении</span>
+              {% elif object.status == 'accepted' %}
+                <span class="badge bg-success">Принят</span>
+              {% elif object.status == 'rejected' %}
+                <span class="badge bg-danger">Отклонён</span>
+              {% endif %}
+            </p>
+          </div>
+
+          <a href="{% url 'ads:update_exc' exc_pk=object.pk %}" class="stretched-link"></a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <div class="alert alert-info text-center" role="alert">
+        У вас пока нет предложений на обмен.
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

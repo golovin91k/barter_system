@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load tz %}
+{% block title %}
+  {{ object.title }}
+{% endblock %}
+{% block content %}
+  <div class="col d-flex justify-content-center">
+    <div class="card" style="width: 40rem;">
+      <div class="card-body">
+        {% if object.image_url %}
+          <a href="{{ object.image_url }}" target="_blank">
+            <img class="border-3 rounded img-fluid img-thumbnail mb-2 mx-auto d-block" src="{{ object.image_url }}">
+          </a>
+        {% endif %}
+
+        <h5 class="card-title">{{ object.title }}</h5>
+        <p class="card-text"><b>Описание:</b> {{object.description}}</p>
+        <p class="card-text"><b>Категория:</b> {{object.get_category_display}}</p>
+        <p class="card-text"><b>Состояние:</b> {{object.get_condition_display}}</p>
+        <p class="card-text">Cоздано пользователем: {{object.user.username}}</p>
+        <p class="card-text">Дата публикации: {{object.created_at|localtime|date:"d.m.Y H:i" }}</p>
+        {% if object.is_available %}
+        <p class="text-success">Доступно для обмена</p>
+        {% else %}
+        <p class="text-danger">Недоступно для обмена</p>
+        {% endif %}
+        {% if user == object.user and object.is_available %}
+        <a href="{% url 'ads:update_ad' ad_pk=object.pk %}" class="btn btn-primary">
+          Редактировать объявление
+        </a>
+        <form method="post" action="{% url 'ads:delete_ad' ad_pk=object.pk %}" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            Удалить объявление
+          </button>
+        </form>
+        {% elif user.is_authenticated and user != object.user and object.is_available %}
+        <form method="get" action="{% url 'ads:user_available_ads' object.pk %}" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success"> Сделать запрос на обмен
+          </button>
+        </form>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+{% endblock %}

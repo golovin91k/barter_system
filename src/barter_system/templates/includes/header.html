@@ -1,0 +1,40 @@
+{% load static %}
+<header>
+  <nav class="navbar navbar-expand-lg navbar-light bg-info shadow-sm py-3">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-white" href="{% url 'ads:list' %}">
+        <span class="text-danger">Платформа</span> <span class="text-white">для обмена вещами</span>
+      </a>
+
+      {% if user.is_authenticated %}
+        <div class="d-flex align-items-center ms-auto me-3 text-white">
+          Привет, <b class="ms-1">{{ user.username }}</b>
+        </div>
+      {% endif %}
+
+      <div class="btn-group" role="group">
+        {% if user.is_authenticated %}
+          <a class="btn btn-outline-light" href="{% url 'ads:user_ads' %}">
+            📦 Мои объявления
+          </a>
+          <a class="btn btn-outline-light" href="{% url 'ads:user_excs' %}">
+            🔁 Мои обмены
+          </a>
+          <a class="btn btn-outline-light text-primary fw-bold" href="{% url 'ads:add_ad' %}">
+            ➕ Новое объявление
+          </a>
+          <a class="btn btn-outline-light" href="{% url 'logout' %}">
+            🚪 Выйти
+          </a>
+        {% else %}
+          <a class="btn btn-outline-light" href="{% url 'login' %}">
+            🔑 Войти
+          </a>
+          <a class="btn btn-light text-success fw-bold" href="{% url 'registration' %}">
+            📝 Регистрация
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+</header>

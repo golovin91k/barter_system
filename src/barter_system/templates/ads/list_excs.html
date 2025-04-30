@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load tz %}
+
+{% block title %}
+  Платформа для обмена вещами
+{% endblock %}
+
+{% block content %}
+  <div class="container d-flex justify-content-center mb-4">
+    <form method="get" action="{% url 'ads:list' %}" class="w-100">
+      <div class="row g-2 align-items-end flex-wrap">
+        
+        <!-- Получатели заявок на обмен -->
+        <div class="col-auto">
+          <label for="ad_receiver" class="form-label mb-0">Получатели запросов</label>
+          <select name="ad_receiver" id="ad_receiver" class="form-select">
+            <option value="">Все</option>
+            {% for ad_receiver in ad_receivers %}
+              <option value="{{ ad_receiver }}" {% if request.GET.ad_receiver == ad_receiver %}selected{% endif %}>{{ ad_receiver }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Отправители заявок на обмен -->
+        <div class="col-auto">
+          <label for="ad_sender" class="form-label mb-0">Отправители запросов</label>
+          <select name="ad_sender" id="ad_sender" class="form-select">
+            <option value="">Все</option>
+            {% for ad_sender in ad_senders %}
+              <option value="{{ ad_sender }}" {% if request.GET.ad_sender == ad_sender %}selected{% endif %}>{{ ad_sender }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Статус -->
+        <div class="col-auto">
+          <label for="status" class="form-label mb-0">Статус</label>
+          <select name="status" id="status" class="form-select">
+            <option value="">Все</option>
+            {% for value, label in status_choices %}
+              <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Кнопка -->
+        <div class="col-auto">
+          <button type="submit" class="btn btn-primary">Фильтровать</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <h2 class="mb-3">Список объявлений</h2>
+  <div class="container">
+    <div class="row">
+      {% for object in object_list %}
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+          <div class="card h-100">
+            <a href="{% url 'ads:detail_ad' ad_pk=object.pk %}" class="text-decoration-none">
+              <img src="{{ object.image_url }}" class="card-img-top" alt="...">
+              <div class="card-body">
+                <h5 class="card-title">{{ object.title }}</h5>
+            </a>
+                <p class="card-text"><b>Описание:</b> {{ object.description }}</p>
+                <p class="card-text"><b>Категория:</b> {{ object.get_category_display }}</p>
+                <p class="card-text"><b>Состояние:</b> {{ object.get_condition_display }}</p>
+                <p class="card-text">Создано пользователем: {{ object.user.username }}</p>
+                <p class="card-text">Дата публикации: {{ object.created_at|localtime|date:"d.m.Y H:i" }}</p>
+                {% if object.is_available %}
+                  <p style="color: #198754">Доступно для обмена</p>
+                {% else %}
+                  <p style="color: #dc3545">Недоступно для обмена</p>
+                {% endif %}
+              </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Пагинация -->
+  <div class="pagination mt-4">
+    <span class="step-links">
+      {% if page_obj.has_previous %}
+        <a href="?page=1">&laquo; Первая</a>
+        <a href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
+      {% endif %}
+
+      <span class="current">
+        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+      </span>
+
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Следующая</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">Последняя &raquo;</a>
+      {% endif %}
+    </span>
+  </div>
+
+{% endblock %}

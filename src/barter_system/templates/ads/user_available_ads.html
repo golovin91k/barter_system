@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2 style="margin-top:20px">Выберите Ваше объявление для обмена</h2>
+  <div class="container">
+    <div class="row">
+      {% for object in object_list %}
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+          <div class="card h-100">
+            <a href="{% url 'ads:add_exc' ad_receiver_pk=ad_receiver_pk ad_sender_pk=object.pk %}" class="text-decoration-none"> 
+            <img src={{object.image_url}} class="card-img-top" alt="...">
+            <div class="card-body">
+              <h5 class="card-title">
+                {{object.title}}</h5></a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="pagination">
+    <span class="step-links">
+      {% if page_obj.has_previous %}
+        <a href="?page=1">&laquo; Первая</a>
+        <a href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
+      {% endif %}
+  
+      <span class="current">
+        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+      </span>
+  
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Следующая</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">Последняя &raquo;</a>
+      {% endif %}
+    </span>
+  </div>
+{% endblock content %}

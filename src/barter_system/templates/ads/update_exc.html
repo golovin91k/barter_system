@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block title %}
+  Обмен объявлениями
+{% endblock %}
+
+{% block content %}
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-md-5">
+        <div class="card mb-4">
+          <div class="card-body text-center">
+            {% if object.ad_sender.image_url %}
+              <a href="{{ object.ad_sender.image_url }}" target="_blank">
+                <img class="border-3 rounded img-fluid img-thumbnail mb-3" src="{{ object.ad_sender.image_url }}">
+              </a>
+            {% endif %}
+            <h5 class="card-title">{{ object.ad_sender.title }}</h5>
+            <p class="card-text">{{ object.ad_sender.description|linebreaksbr }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-5">
+        <div class="card mb-4">
+          <div class="card-body text-center">
+            {% if object.ad_receiver.image_url %}
+              <a href="{{ object.ad_receiver.image_url }}" target="_blank">
+                <img class="border-3 rounded img-fluid img-thumbnail mb-3" src="{{ object.ad_receiver.image_url }}">
+              </a>
+            {% endif %}
+            <h5 class="card-title">{{ object.ad_receiver.title }}</h5>
+            <p class="card-text">{{ object.ad_receiver.description|linebreaksbr }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        {% if object.ad_receiver.user == request.user and object.status == "pending" %}
+          <form method="post" action="{% url 'ads:update_exc' exc_pk=object.pk %}">
+            {% csrf_token %}
+            
+            {# Глобальные ошибки формы #}
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+              </div>
+            {% endif %}
+    
+            {# Поле выбора статуса #}
+            <div class="mb-3">
+              {% bootstrap_field form.status %}
+              {% if form.status.errors %}
+                <div class="text-danger mt-2">
+                  {{ form.status.errors }}
+                </div>
+              {% endif %}
+            </div>
+    
+            {% bootstrap_button button_type="submit" content="Принять решение" button_class="btn-success" %}
+          </form>
+
+        {% elif object.ad_sender.user == request.user and object.status == "pending" %}
+          <form method="post" action="{% url 'ads:delete_exc' exc_pk=object.pk %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">
+              Удалить запрос на обмен
+            </button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

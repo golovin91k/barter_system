@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% block title %}
+  Обмен объявлениями
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-5">
+      <div class="card mb-4">
+        <div class="card-body text-center">
+          {% if ad_sender.image_url %}
+            <a href="{{ ad_sender.image_url }}" target="_blank">
+              <img class="border-3 rounded img-fluid img-thumbnail mb-3" src="{{ ad_sender.image_url }}">
+            </a>
+          {% endif %}
+          <h5 class="card-title">{{ ad_sender.title }}</h5>
+          <p class="card-text">{{ ad_sender.description|linebreaksbr }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-5">
+      <div class="card mb-4">
+        <div class="card-body text-center">
+          {% if ad_receiver.image_url %}
+            <a href="{{ ad_receiver.image_url }}" target="_blank">
+              <img class="border-3 rounded img-fluid img-thumbnail mb-3" src="{{ ad_receiver.image_url }}">
+            </a>
+          {% endif %}
+          <h5 class="card-title">{{ ad_receiver.title }}</h5>
+          <p class="card-text">{{ ad_receiver.description|linebreaksbr }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        {% bootstrap_button button_type="submit" content="Создать" %}
+
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
