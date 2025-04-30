@@ -11,7 +11,7 @@ services:
     depends_on:
       barter_system_db:
         condition: service_healthy
-    command: gunicorn barter_system.wsgi:application --bind 0.0.0.0:8090 --workers 3
+    command: bash -c "wait-for-it barter_system_db:5432 -- gunicorn barter_system.wsgi:application --bind 0.0.0.0:8090 --workers 3"
     volumes:
       - /home/barter_system/statics:/app/collected_static
       - /home/barter_system/media:/app/media
