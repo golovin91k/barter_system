@@ -5,11 +5,11 @@ from django.urls import include, path, reverse_lazy
 
 
 urlpatterns = [
-    path('', include('ads.urls')),
-    path('auth/', include('django.contrib.auth.urls')),
-    path('admin/', admin.site.urls),
+    path('barter_system/', include('ads.urls')),
+    path('barter_system/auth/', include('django.contrib.auth.urls')),
+    path('barter_system/admin/', admin.site.urls),
     path(
-        'auth/registration/',
+        'barter_system/auth/registration/',
         CreateView.as_view(
             template_name='registration/registration_form.html',
             form_class=UserCreationForm,
