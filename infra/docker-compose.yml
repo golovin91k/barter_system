@@ -13,7 +13,7 @@ services:
         condition: service_healthy
     command: gunicorn barter_system.wsgi:application --bind 0.0.0.0:8090 --workers 3
     volumes:
-      - /home/barter_system/static:/app/collected_static
+      - /home/barter_system/statics:/app/collected_static
       - /home/barter_system/media:/app/media
     networks:
       - barter_system-network
