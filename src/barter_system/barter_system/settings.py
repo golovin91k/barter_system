@@ -91,10 +91,12 @@ USE_I18N = True
 
 TIME_ZONE = 'Europe/Moscow'
 USE_TZ = True
-#
+
+FORCE_SCRIPT_NAME = '/barter_system'
 STATIC_URL = '/barter_system/statics/'
+MEDIA_URL = '/barter_system/media/'
+
 STATIC_ROOT = BASE_DIR / 'collected_static'
-MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
