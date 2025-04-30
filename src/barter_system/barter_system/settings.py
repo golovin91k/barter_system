@@ -104,3 +104,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'auth.User'
 
 LOGIN_REDIRECT_URL = reverse_lazy('ads:list')
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://golovin-projects.ddns.net',  # Добавьте ваш домен
+]
