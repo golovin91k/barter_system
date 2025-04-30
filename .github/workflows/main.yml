@@ -23,7 +23,7 @@ jobs:
         - name: Push to DockerHub
           uses: docker/build-push-action@v4
           with:
-            context: .src/barter_system/
+            context: ./src/barter_system/
             push: true
             tags: golovin91k/barter_system:latest
 
