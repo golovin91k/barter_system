@@ -24,7 +24,8 @@ class Ad(BaseModel):
     title = models.CharField('Название', max_length=AD_TITLE_MAX_LENGTH)
     description = models.TextField('Описание')
     image_url = models.URLField(
-        'Изображение', max_length=AD_IMAGE_URL_MAX_LENGTH, blank=True)
+        'Ссылка на изображение', max_length=AD_IMAGE_URL_MAX_LENGTH,
+        blank=True)
     category = models.CharField(
         'Категория', choices=CATEGORY_CHOICES, default='other')
     condition = models.CharField(
