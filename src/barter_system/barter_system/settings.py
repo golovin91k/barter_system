@@ -10,8 +10,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'SECRET_KEY_DEFAULT')
-# DEBUG = DEBUG = os.getenv('DEBUG', 'True') == 'True'#
-DEBUG = True
+DEBUG = DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = (os.getenv('ALLOWED_HOSTS', '127.0.0.1')).split()
 
@@ -66,7 +65,7 @@ DATABASES = {
         'PORT': os.getenv('POSTGRES_PORT', 5432)
     }
 }
-####
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -92,6 +91,8 @@ USE_I18N = True
 TIME_ZONE = 'Europe/Moscow'
 USE_TZ = True
 
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+
 FORCE_SCRIPT_NAME = '/barter_system'
 STATIC_URL = '/barter_system/statics/'
 MEDIA_URL = '/barter_system/media/'
@@ -103,8 +104,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'auth.User'
 
-LOGIN_REDIRECT_URL = reverse_lazy('ads:list')
+LOGOUT_REDIRECT_URL = 'ads:list_ads'
+LOGIN_REDIRECT_URL = reverse_lazy('ads:list_ads')
+LOGIN_URL = '/auth/login/'
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://golovin-projects.ddns.net',  # Добавьте ваш домен
+    'https://golovin-projects.ddns.net',
 ]

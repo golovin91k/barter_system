@@ -2,21 +2,20 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views import generic
-from django.views.generic import TemplateView
 
+from .constans import (
+    CATEGORY_CHOICES, CONDITION_CHOICES, STATUS_CHOICES)
 from .forms import (
     AdForm, ExchangeProposalFormCreate, ExchangeProposalFormUpdate)
 from .models import Ad, ExchangeProposal
-from .constans import (
-    CATEGORY_CHOICES, CONDITION_CHOICES, STATUS_CHOICES)
 
 
 class AdsListView(generic.ListView):
-    """Список всех заметок объявлений."""
+    """Список всех объявлений."""
     model = Ad
     template_name = 'ads/list_ads.html'
     paginate_by = 8
@@ -46,6 +45,7 @@ class AdsListView(generic.ListView):
 
 
 class AdCreateView(LoginRequiredMixin, generic.CreateView):
+    """Создание объявления."""
     model = Ad
     template_name = 'ads/form_ad.html'
     form_class = AdForm
@@ -63,6 +63,7 @@ class AdCreateView(LoginRequiredMixin, generic.CreateView):
 
 
 class AdDetailView(generic.DetailView):
+    """Просмотр объявления."""
     model = Ad
     template_name = 'ads/detail_ad.html'
     pk_url_kwarg = 'ad_pk'
@@ -76,42 +77,50 @@ class AdDetailView(generic.DetailView):
 
 
 class AdUpdateView(LoginRequiredMixin, generic.UpdateView):
+    """Изменение объявления."""
     model = Ad
     template_name = 'ads/form_ad.html'
     form_class = AdForm
     pk_url_kwarg = 'ad_pk'
 
-    def dispatch(self, request, *args, **kwargs):
-        obj = self.get_object()
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
         if obj.user != self.request.user:
-            raise PermissionDenied('Вы не можете редактировать это объявление')
-        return super().dispatch(request, *args, **kwargs)
+            raise Http404('Объект не найден')
+        if obj.is_available is False:
+            raise PermissionDenied('Этот объект нельзя редактировать')
+        return obj
 
     def get_success_url(self):
+        messages.success(self.request, 'Объявление успешно изменено.')
         obj = self.object
         return reverse_lazy('ads:detail_ad', kwargs={'ad_pk': obj.pk})
 
 
 class AdDeleteView(LoginRequiredMixin, generic.DeleteView):
+    """Удаление объявления."""
     model = Ad
     pk_url_kwarg = 'ad_pk'
-    success_url = reverse_lazy('ads:list')
+    success_url = reverse_lazy('ads:list_ads')
+    template_name = 'ads/ad_confirm_delete.html'
 
-    def get(self, request, *args, **kwargs):
-        return HttpResponseRedirect(self.success_url)
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.user != self.request.user:
+            raise Http404('Объект не найден')
+        if obj.is_available is False:
+            raise PermissionDenied('Этот объект нельзя удалить.')
+        return obj
 
-    def delete(self, request, *args, **kwargs):
+    def form_valid(self, form):
         self.object = self.get_object()
-
-        if self.object.user != request.user:
-            raise PermissionDenied('Вы не можете удалить это объявление')
-
-        success_url = self.get_success_url()
         self.object.delete()
-        return HttpResponseRedirect(success_url)
+        messages.success(self.request, 'Объявление успешно удалено.')
+        return HttpResponseRedirect(self.success_url)
 
 
 class UserAvailableAdsView(LoginRequiredMixin, generic.ListView):
+    """Отображение доступных для пользователя объявлений для обмена."""
     model = Ad
     template_name = 'ads/user_available_ads.html'
     paginate_by = 8
@@ -125,11 +134,13 @@ class UserAvailableAdsView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         queryset = Ad.objects.filter(
-            Q(user=self.request.user) & Q(is_available=True))
+            Q(user=self.request.user) & Q(is_available=True)).order_by(
+                '-created_at')
         return queryset
 
 
 class ExcCreateView(LoginRequiredMixin, generic.CreateView):
+    """Создание обмена."""
     model = ExchangeProposal
     template_name = 'ads/create_exc.html'
     form_class = ExchangeProposalFormCreate
@@ -172,79 +183,10 @@ class ExcCreateView(LoginRequiredMixin, generic.CreateView):
         return reverse_lazy('ads:update_exc', kwargs={'exc_pk': obj.pk})
 
 
-class ExcUpdateView(LoginRequiredMixin, generic.UpdateView):
+class ExcsListView(generic.ListView):
+    """Список всех обменов."""
     model = ExchangeProposal
-    form_class = ExchangeProposalFormUpdate
-    template_name = 'ads/update_exc.html'
-    pk_url_kwarg = 'exc_pk'
-    success_url = reverse_lazy('ads:user_excs')
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-
-        exchange = self.object
-        if exchange.status == 'accepted':
-            if exchange.ad_sender:
-                exchange.ad_sender.is_available = False
-                exchange.ad_sender.save()
-
-            if exchange.ad_receiver:
-                exchange.ad_receiver.is_available = False
-                exchange.ad_receiver.save()
-
-        elif exchange.status == 'rejected':
-            if exchange.ad_sender:
-                exchange.ad_sender.is_available = True
-                exchange.ad_sender.save()
-
-            if exchange.ad_receiver:
-                exchange.ad_receiver.is_available = True
-                exchange.ad_receiver.save()
-
-        elif exchange.status == 'pending':
-            if exchange.ad_sender:
-                exchange.ad_sender.is_available = True
-                exchange.ad_sender.save()
-
-            if exchange.ad_receiver:
-                exchange.ad_receiver.is_available = True
-                exchange.ad_receiver.save()
-        return response
-
-
-class ExcDeleteView(LoginRequiredMixin, generic.DeleteView):
-    model = ExchangeProposal
-    pk_url_kwarg = 'exc_pk'
-    success_url = reverse_lazy('ads:user_excs')
-
-    def get(self, request, *args, **kwargs):
-        return HttpResponseRedirect(self.success_url)
-
-    def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
-
-        if self.object.ad_sender.user != request.user:
-            raise PermissionDenied(
-                'Вы не можете удалить это предложение обмена')
-
-        success_url = self.get_success_url()
-        self.object.delete()
-        return HttpResponseRedirect(success_url)
-
-
-class UserAdsView(LoginRequiredMixin, generic.ListView):
-    model = Ad
-    template_name = 'ads/user_ads.html'
-    paginate_by = 8
-
-    def get_queryset(self):
-        queryset = Ad.objects.filter(Q(user=self.request.user))
-        return queryset
-
-
-class UserExcsView(LoginRequiredMixin, generic.ListView):
-    model = ExchangeProposal
-    template_name = 'ads/user_excs.html'
+    template_name = 'ads/list_excs.html'
     paginate_by = 4
 
     def get_queryset(self):
@@ -283,14 +225,111 @@ class UserExcsView(LoginRequiredMixin, generic.ListView):
         return context
 
 
-class Error(TemplateView):
-    template_name = 'ads/error_page.html'
+class ExcUpdateView(LoginRequiredMixin, generic.UpdateView):
+    """Рассмотрение заявки на обмен."""
+    model = ExchangeProposal
+    form_class = ExchangeProposalFormUpdate
+    template_name = 'ads/update_exc.html'
+    pk_url_kwarg = 'exc_pk'
+    success_url = reverse_lazy('ads:user_excs')
+
+    def form_valid(self, form):
+        exchange = self.get_object()
+
+        if exchange.ad_receiver.user != self.request.user:
+            raise PermissionDenied(
+                'Вы не можете рассмотреть это предложение обмена')
+
+        if exchange.status != 'pending':
+            raise PermissionDenied(
+                'Этот обмен уже рассмотрен')
+
+        new_status = form.cleaned_data['status']
+
+        response = super().form_valid(form)
+
+        if new_status == 'accepted':
+            if exchange.ad_sender:
+                exchange.ad_sender.is_available = False
+                exchange.ad_sender.save()
+
+            if exchange.ad_receiver:
+                exchange.ad_receiver.is_available = False
+                exchange.ad_receiver.save()
+
+        return response
+
+
+class ExcDeleteView(LoginRequiredMixin, generic.DeleteView):
+    """Удаление заявки на обмен."""
+    model = ExchangeProposal
+    pk_url_kwarg = 'exc_pk'
+    template_name = 'ads/exc_confirm_delete.html'
+    success_url = reverse_lazy('ads:user_excs')
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.ad_sender.user != self.request.user:
+            raise PermissionDenied(
+                'Вы не можете удалить это предложение обмена')
+        return obj
+
+    def form_valid(self, form):
+        self.object = self.get_object()
+        self.object.delete()
+        messages.success(self.request, 'Запрос обмена успешно удален.')
+        return HttpResponseRedirect(self.get_success_url())
+
+
+class UserAdsView(LoginRequiredMixin, generic.ListView):
+    """Список объявлений пользователя."""
+    model = Ad
+    template_name = 'ads/user_ads.html'
+    paginate_by = 8
+
+    def get_queryset(self):
+        queryset = Ad.objects.filter(
+            Q(user=self.request.user)).order_by('-created_at')
+        return queryset
+
+
+class UserExcsView(LoginRequiredMixin, generic.ListView):
+    """Список обменов пользователя."""
+    model = ExchangeProposal
+    template_name = 'ads/user_excs.html'
+    paginate_by = 4
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        ad_receiver = self.request.GET.get('ad_receiver')
+        ad_sender = self.request.GET.get('ad_sender')
+        status = self.request.GET.get('status')
+
+        if ad_receiver:
+            queryset = queryset.filter(
+                ad_receiver__user__username__iexact=ad_receiver)
+
+        if ad_sender:
+            queryset = queryset.filter(
+                ad_sender__user__username__iexact=ad_sender)
+
+        if status:
+            queryset = queryset.filter(status__iexact=status)
+
+        queryset = queryset.select_related(
+            'ad_receiver__user',
+            'ad_sender__user'
+        ).order_by('-created_at')
+
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        error_message = self.request.session.get(
-            'error_message', 'Произошла ошибка.')
-        context['error_message'] = error_message
-        if 'error_message' in self.request.session:
-            del self.request.session['error_message']
+        context['ad_senders'] = ExchangeProposal.objects.values_list(
+            'ad_sender__user__username', flat=True).distinct()
+
+        context['ad_receivers'] = ExchangeProposal.objects.values_list(
+            'ad_receiver__user__username', flat=True).distinct()
+        context['status_choices'] = STATUS_CHOICES
         return context

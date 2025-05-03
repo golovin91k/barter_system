@@ -28,12 +28,9 @@
         <a href="{% url 'ads:update_ad' ad_pk=object.pk %}" class="btn btn-primary">
           Редактировать объявление
         </a>
-        <form method="post" action="{% url 'ads:delete_ad' ad_pk=object.pk %}" style="display: inline;">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-danger">
-            Удалить объявление
-          </button>
-        </form>
+        <a href="{% url 'ads:delete_ad' ad_pk=object.pk %}" class="btn btn-danger">
+          Удалить объявление
+        </a>
         {% elif user.is_authenticated and user != object.user and object.is_available %}
         <form method="get" action="{% url 'ads:user_available_ads' object.pk %}" style="display: inline;">
           {% csrf_token %}

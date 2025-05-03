@@ -25,32 +25,26 @@
       <div class="col-md-5">
         <div class="card mb-4">
           <div class="card-body text-center">
-            {% if object.ad_receiver.image_url %}
               <a href="{{ object.ad_receiver.image_url }}" target="_blank">
                 <img class="border-3 rounded img-fluid img-thumbnail mb-3" src="{{ object.ad_receiver.image_url }}">
               </a>
-            {% endif %}
             <h5 class="card-title">{{ object.ad_receiver.title }}</h5>
             <p class="card-text">{{ object.ad_receiver.description|linebreaksbr }}</p>
           </div>
         </div>
       </div>
     </div>
-
     <div class="row justify-content-center">
       <div class="col-md-8">
         {% if object.ad_receiver.user == request.user and object.status == "pending" %}
           <form method="post" action="{% url 'ads:update_exc' exc_pk=object.pk %}">
             {% csrf_token %}
             
-            {# Глобальные ошибки формы #}
             {% if form.non_field_errors %}
               <div class="alert alert-danger">
                 {{ form.non_field_errors }}
               </div>
             {% endif %}
-    
-            {# Поле выбора статуса #}
             <div class="mb-3">
               {% bootstrap_field form.status %}
               {% if form.status.errors %}
@@ -59,7 +53,6 @@
                 </div>
               {% endif %}
             </div>
-    
             {% bootstrap_button button_type="submit" content="Принять решение" button_class="btn-success" %}
           </form>
 
@@ -70,6 +63,19 @@
               Удалить запрос на обмен
             </button>
           </form>
+        {% else %}
+        <div class="mt-3">
+          <p class="card-text"><strong>Комментарий:</strong> {{ object.comment|default:"-"|linebreaksbr }}</p>
+          <p class="card-text"><strong>Статус:</strong> 
+            {% if object.status == 'pending' %}
+              <span class="badge bg-warning text-dark">На рассмотрении</span>
+            {% elif object.status == 'accepted' %}
+              <span class="badge bg-success">Принят</span>
+            {% elif object.status == 'rejected' %}
+              <span class="badge bg-danger">Отклонён</span>
+            {% endif %}
+          </p>
+        </div>
         {% endif %}
       </div>
     </div>

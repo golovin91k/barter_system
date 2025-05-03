@@ -6,52 +6,13 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container d-flex justify-content-center mb-4">
-    <form method="get" action="{% url 'ads:list_ads' %}" class="w-100">
-      <div class="row g-2 align-items-end flex-wrap">
-        
-        <!-- Категория -->
-        <div class="col-auto">
-          <label for="category" class="form-label mb-0">Категория</label>
-          <select name="category" id="category" class="form-select">
-            <option value="">Все</option>
-            {% for value, label in category_choices %}
-              <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        </div>
 
-        <!-- Состояние -->
-        <div class="col-auto">
-          <label for="condition" class="form-label mb-0">Состояние</label>
-          <select name="condition" id="condition" class="form-select">
-            <option value="">Все</option>
-            {% for value, label in condition_choices %}
-              <option value="{{ value }}" {% if request.GET.condition == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <!-- Поиск -->
-        <div class="col-auto">
-          <label for="search" class="form-label mb-0">Поиск по названию и описанию</label>
-          <input type="text" name="search" id="search" class="form-control" value="{{ request.GET.search }}">
-        </div>
-
-        <!-- Кнопка -->
-        <div class="col-auto">
-          <button type="submit" class="btn btn-primary">Фильтровать</button>
-        </div>
-      </div>
-    </form>
-  </div>
-
-  <h2 class="mb-3">Список объявлений</h2>
+  <h2 class="mb-3">Список моих объявлений</h2>
   <div class="container">
     <div class="row">
       {% for object in object_list %}
       <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-        <div class="card h-100 position-relative">  {# позиционирование для stretched-link #}
+        <div class="card h-100 position-relative"> 
           <img src="{{ object.image_url }}" class="card-img-top" alt="Изображение объявления">
     
           <div class="card-body">

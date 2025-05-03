@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block title %}
+  Подтверждение удаления
+{% endblock %}
+
+{% block content %}
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="alert alert-warning text-center" role="alert">
+          <h4 class="alert-heading">Вы уверены, что хотите удалить это предложение обмена?</h4>
+          <p class="mb-0">Это действие невозможно отменить.</p>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-body d-flex justify-content-around text-center">
+            {% if object.ad_sender.image_url %}
+              <div>
+                <img class="img-fluid img-thumbnail mb-2" src="{{ object.ad_sender.image_url }}" alt="Ad sender image">
+                <h5>{{ object.ad_sender.title }}</h5>
+              </div>
+            {% endif %}
+            {% if object.ad_receiver.image_url %}
+              <div>
+                <img class="img-fluid img-thumbnail mb-2" src="{{ object.ad_receiver.image_url }}" alt="Ad receiver image">
+                <h5>{{ object.ad_receiver.title }}</h5>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="d-flex justify-content-between">
+            <a href="{{ request.META.HTTP_REFERER|default:'/' }}" class="btn btn-secondary">Отмена</a>
+            <button type="submit" class="btn btn-danger">Удалить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

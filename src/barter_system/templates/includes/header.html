@@ -2,10 +2,12 @@
 <header>
   <nav class="navbar navbar-expand-lg navbar-light bg-info shadow-sm py-3">
     <div class="container">
-      <a class="navbar-brand fw-bold text-white" href="{% url 'ads:list' %}">
+      <a class="navbar-brand fw-bold text-white" href="{% url 'ads:list_ads' %}">
         <span class="text-danger">Платформа</span> <span class="text-white">для обмена вещами</span>
       </a>
-
+      <a class="btn btn-outline-light" href="{% url 'ads:list_excs' %}">
+        🔁 Обмены
+      </a>
       {% if user.is_authenticated %}
         <div class="d-flex align-items-center ms-auto me-3 text-white">
           Привет, <b class="ms-1">{{ user.username }}</b>
