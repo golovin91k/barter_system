@@ -1,8 +1,16 @@
 asgiref==3.8.1
+colorama==0.4.6
 Django==4.2.20
 django-bootstrap5==25.1
+exceptiongroup==1.2.2
+iniconfig==2.1.0
+packaging==25.0
+pluggy==1.5.0
 psycopg2-binary==2.9.10
+pytest==8.3.5
+pytest-django==4.11.1
 python-dotenv==1.1.0
 sqlparse==0.5.3
+tomli==2.2.1
 typing_extensions==4.13.2
 tzdata==2025.2
